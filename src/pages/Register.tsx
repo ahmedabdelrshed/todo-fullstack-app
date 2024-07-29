@@ -3,7 +3,7 @@ import ErrorMassage from "../errors/ErrorMassage";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import { useForm, SubmitHandler } from "react-hook-form";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { registerSchema } from "../validation";
 import axiosInstance from "../config/axios.config";
@@ -19,7 +19,7 @@ interface IFormInput {
 
 const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -43,6 +43,9 @@ const Register = () => {
             duration: 3000,
           }
         );
+        setTimeout(() => {
+          navigate("/login");
+        }, 3000);
       }
     } catch (error) {
       const objError = error as AxiosError<IErrorResponse>;
@@ -51,10 +54,6 @@ const Register = () => {
     } finally {
       setIsLoading(false);
     }
-
-    // setTimeout(() => {
-    //   navigate("/login");
-    // }, 2000);
   };
   return (
     <div className="max-w-md mx-auto">

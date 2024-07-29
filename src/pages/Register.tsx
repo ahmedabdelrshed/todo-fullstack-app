@@ -3,9 +3,13 @@ import ErrorMassage from "../errors/ErrorMassage";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { registerSchema } from "../validation";
+import axiosInstance from "../config/axios.config";
+import { useState } from "react";
+import { AxiosError } from "axios";
+import { IErrorResponse } from "../interfaces";
 
 interface IFormInput {
   username: string;
@@ -14,7 +18,8 @@ interface IFormInput {
 }
 
 const Register = () => {
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  // const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -22,24 +27,35 @@ const Register = () => {
   } = useForm<IFormInput>({
     resolver: yupResolver(registerSchema),
   });
-  const onSubmit: SubmitHandler<IFormInput> = (data) => {
+  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     console.log(data);
-
-    toast.success(
-      "You will navigate to the login page after 2 seconds to login.",
-      {
-        style: {
-          backgroundColor: "black",
-          color: "white",
-        },
-        duration: 1500,
+    setIsLoading(true);
+    try {
+      const { status } = await axiosInstance.post("/auth/local/register", data);
+      if (status === 200) {
+        toast.success(
+          "You will navigate to the login page after 3 seconds to login.",
+          {
+            style: {
+              backgroundColor: "black",
+              color: "white",
+            },
+            duration: 3000,
+          }
+        );
       }
-    );
-    setTimeout(() => {
-      navigate("/login");
-    }, 2000);
+    } catch (error) {
+      const objError = error as AxiosError<IErrorResponse>;
+      console.log(objError);
+      toast.error(`${objError.response?.data?.error?.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+
+    // setTimeout(() => {
+    //   navigate("/login");
+    // }, 2000);
   };
-  console.log(errors);
   return (
     <div className="max-w-md mx-auto">
       <h2 className="text-center mb-4 text-3xl font-semibold">
@@ -63,7 +79,9 @@ const Register = () => {
           />
           {errors.password && <ErrorMassage msg={errors.password?.message} />}
         </div>
-        <Button width="w-full">Register</Button>
+        <Button width="w-full" isLoading={isLoading}>
+          {isLoading ? "Loading. . ." : "Register"}
+        </Button>
       </form>
     </div>
   );

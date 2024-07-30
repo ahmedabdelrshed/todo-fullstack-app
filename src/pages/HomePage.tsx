@@ -1,10 +1,14 @@
 // import { useLocation } from "react-router-dom"
 
+import TodoList from "./TodoList"
+
 const HomePage = () => {
     // const userdate = useLocation()
     // console.log(userdate.state.name)
   return (
-    <div>HomePage </div>
+    <section className="max-w-2xl mx-auto">
+     <TodoList/>
+    </section>
   )
 }
 

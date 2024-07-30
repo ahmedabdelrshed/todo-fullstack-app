@@ -12,7 +12,6 @@ import ProtectedRouter from "../auth/ProtectedRouter";
 import HomePage from "../pages/HomePage";
 const userDataString = localStorage.getItem("userData");
 const userData = userDataString ? JSON.parse(userDataString) : null;
-console.log(userData);
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
@@ -23,6 +22,14 @@ const router = createBrowserRouter(
           element={
             <ProtectedRouter isAllowed={userData?.jwt} redirectPath="/login">
               <HomePage />
+            </ProtectedRouter>
+          }
+        />
+        <Route
+          path="profile"
+          element={
+            <ProtectedRouter isAllowed={userData?.jwt} redirectPath="/login">
+              <h2>Profile Page</h2>
             </ProtectedRouter>
           }
         />

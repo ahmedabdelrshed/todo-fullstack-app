@@ -19,7 +19,7 @@ const Navbar = () => {
         <li className="text-white duration-200 font-semibold text-lg">
           <NavLink to="/">Home</NavLink>
         </li>
-        <p className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3">
           {userData?.jwt ? (
             <>
               <div className=" bg-white p-[4px] rounded-md border-blue-800 font-semibold ">
@@ -27,6 +27,9 @@ const Navbar = () => {
               </div>
               <li className="text-white duration-200 font-semibold text-lg">
                 <Button onClick={handelLogout}>Logout</Button>
+              </li>
+              <li className="text-white duration-200 font-semibold text-lg">
+                <NavLink to="/profile">Profile</NavLink>
               </li>
             </>
           ) : (
@@ -39,7 +42,7 @@ const Navbar = () => {
               </li>
             </>
           )}
-        </p>
+        </div>
       </ul>
     </nav>
   );

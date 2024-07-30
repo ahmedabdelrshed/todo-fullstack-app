@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { useState } from "react";
 import { AxiosError } from "axios";
 import { IErrorResponse } from "../interfaces";
+import { Link } from "react-router-dom";
 
 interface IFormInput {
   identifier: string;
@@ -25,22 +26,17 @@ const Login = () => {
     resolver: yupResolver(loginSchema),
   });
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-    console.log(data);
     setIsLoading(true);
     try {
       const res = await axiosInstance.post("/auth/local", data);
-      console.log(res);
+      localStorage.setItem("userData", JSON.stringify(res.data));
       if (res.status === 200) {
-        toast.success(
-          "You will navigate to the Home page after 3 seconds to login.",
-          {
-            style: {
-              backgroundColor: "black",
-              color: "white",
-            },
-            duration: 3000,
-          }
-        );
+        toast.success("You will navigate to the Home page after 3 seconds.", {
+          duration: 1500,
+        });
+        setTimeout(() => {
+          location.replace("/");
+        }, 2000);
       }
     } catch (error) {
       const objError = error as AxiosError<IErrorResponse>;
@@ -76,6 +72,12 @@ const Login = () => {
           {isLoading ? "Loading . . ." : `Login`}
         </Button>
       </form>
+      <p className="text-center mt-5 ">
+        Don't have an account?{" "}
+        <Link className="text-blue-800" to="/register">
+          Register
+        </Link>
+      </p>
     </div>
   );
 };

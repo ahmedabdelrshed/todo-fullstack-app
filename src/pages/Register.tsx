@@ -3,7 +3,7 @@ import ErrorMassage from "../errors/ErrorMassage";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { registerSchema } from "../validation";
 import axiosInstance from "../config/axios.config";
@@ -34,18 +34,18 @@ const Register = () => {
       const { status } = await axiosInstance.post("/auth/local/register", data);
       if (status === 200) {
         toast.success(
-          "You will navigate to the login page after 3 seconds to login.",
+          "You will navigate to the login page after 2 seconds to login.",
           {
             style: {
               backgroundColor: "black",
               color: "white",
             },
-            duration: 3000,
+            duration: 2000,
           }
         );
         setTimeout(() => {
           navigate("/login");
-        }, 3000);
+        }, 1500);
       }
     } catch (error) {
       const objError = error as AxiosError<IErrorResponse>;
@@ -82,6 +82,9 @@ const Register = () => {
           {isLoading ? "Loading. . ." : "Register"}
         </Button>
       </form>
+      <p className="text-center mt-5 ">
+        Already have an account? <Link className="text-blue-800" to="/login">Login</Link>
+      </p>
     </div>
   );
 };

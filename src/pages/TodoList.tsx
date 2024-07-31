@@ -3,12 +3,20 @@ import { ITodo } from "../interfaces";
 import useAuthenticatedQuery from "../hooks/useAuthenticatedQuery";
 import Modal from "../ui/Modal";
 import Input from "../ui/Input";
-import { useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
+import Textarea from "../ui/Textarea";
+import axiosInstance from "../config/axios.config";
 
 const TodoList = () => {
   const userDataString = localStorage.getItem("userData");
   const userData = userDataString ? JSON.parse(userDataString) : null;
   const [isEditModal, setIsEditModal] = useState(false);
+  const defaultTodo = {
+    description: "",
+    id: 0,
+    title: "",
+  };
+  const [editTodo, setEditTodo] = useState<ITodo>(defaultTodo);
   // fetch data using custom query hook
   const { isLoading, data } = useAuthenticatedQuery({
     queryKey: ["todos"],
@@ -22,6 +30,34 @@ const TodoList = () => {
   if (isLoading) return "Loading...";
   // Handlers
   const toggleEditModal = () => setIsEditModal(!isEditModal);
+  const onEditTodo = (todo: ITodo) => {
+    setEditTodo(todo);
+    toggleEditModal();
+  };
+  const onCloseEditModal = () => {
+    setEditTodo(defaultTodo);
+    toggleEditModal();
+  };
+  const onChangeEditTodo = (
+    event: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const { value, name } = event.target;
+    setEditTodo({ ...editTodo, [name]: value });
+  };
+  const onSubmitEditTodo = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const { title, description } = editTodo;
+    await axiosInstance.put(
+      `/todos/${editTodo.id}`,
+      { data: { title, description } },
+      {
+        headers: {
+          Authorization: `Bearer ${userData.jwt}`,
+        },
+      }
+    );
+    toggleEditModal();
+  };
   return (
     <div className="space-y-2">
       {data.todos.length ? (
@@ -32,7 +68,7 @@ const TodoList = () => {
           >
             <p className="w-full font-semibold">{todo.title}</p>
             <div className="flex items-center justify-end w-full space-x-3">
-              <Button onClick={toggleEditModal}>Edit</Button>
+              <Button onClick={() => onEditTodo(todo)}>Edit</Button>
               <Button className="bg-red-700">Remove</Button>
             </div>
           </div>
@@ -45,14 +81,30 @@ const TodoList = () => {
         title="Edit Todo"
         closeModal={toggleEditModal}
       >
-        <Input name="title" value={"Edit Todo"}/>
-        <div className="flex items-center justify-between mt-4 space-x-5">
-          <Button >Update</Button>
-          <Button onClick={toggleEditModal} className="bg-red-700">Cancel</Button>
-        </div>
+        <form onSubmit={onSubmitEditTodo}>
+          <Input
+            name="title"
+            value={editTodo.title}
+            onChange={onChangeEditTodo}
+          />
+          <Textarea
+            value={editTodo.description}
+            name="description"
+            onChange={onChangeEditTodo}
+          />
+          <div className="flex items-center justify-between mt-4 space-x-5">
+            <Button>Update</Button>
+            <Button
+              onClick={onCloseEditModal}
+              type="button"
+              className="bg-red-700"
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
       </Modal>
     </div>
   );
 };
-
 export default TodoList;

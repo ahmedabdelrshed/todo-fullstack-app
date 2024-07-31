@@ -6,11 +6,19 @@ import Input from "../ui/Input";
 import { ChangeEvent, FormEvent, useState } from "react";
 import Textarea from "../ui/Textarea";
 import axiosInstance from "../config/axios.config";
+import { validateTodo } from "../validation";
+import ErrorMassage from "../errors/ErrorMassage";
+import toast from "react-hot-toast";
 
 const TodoList = () => {
   const userDataString = localStorage.getItem("userData");
   const userData = userDataString ? JSON.parse(userDataString) : null;
   const [isEditModal, setIsEditModal] = useState(false);
+  const [isDeleteModal, setIsDeleteModal] = useState(false);
+  const [errorEdit, setErrorEdit] = useState({
+    title: "",
+    description: "",
+  });
   const defaultTodo = {
     description: "",
     id: 0,
@@ -19,7 +27,7 @@ const TodoList = () => {
   const [editTodo, setEditTodo] = useState<ITodo>(defaultTodo);
   // fetch data using custom query hook
   const { isLoading, data } = useAuthenticatedQuery({
-    queryKey: ["todos"],
+    queryKey: ["TodoList", `${editTodo.id}`],
     url: "/users/me?populate=todos",
     config: {
       headers: {
@@ -30,6 +38,7 @@ const TodoList = () => {
   if (isLoading) return "Loading...";
   // Handlers
   const toggleEditModal = () => setIsEditModal(!isEditModal);
+  const toggleDeleteModal = () => setIsDeleteModal(!isDeleteModal);
   const onEditTodo = (todo: ITodo) => {
     setEditTodo(todo);
     toggleEditModal();
@@ -37,26 +46,43 @@ const TodoList = () => {
   const onCloseEditModal = () => {
     setEditTodo(defaultTodo);
     toggleEditModal();
+    setErrorEdit({ title: "", description: "" });
   };
   const onChangeEditTodo = (
     event: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>
   ) => {
     const { value, name } = event.target;
     setEditTodo({ ...editTodo, [name]: value });
+    setErrorEdit({ ...errorEdit, [name]: "" });
+  };
+  const onDeleteTodo = (id: number) => {
+    console.log(id);
+    toggleDeleteModal();
   };
   const onSubmitEditTodo = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const { title, description } = editTodo;
-    await axiosInstance.put(
-      `/todos/${editTodo.id}`,
-      { data: { title, description } },
-      {
-        headers: {
-          Authorization: `Bearer ${userData.jwt}`,
-        },
-      }
-    );
-    toggleEditModal();
+    const errors = validateTodo(editTodo.title, editTodo.description);
+    const checkErrorMsg = Object.values(errors).every((error) => error === "");
+    if (!checkErrorMsg) {
+      setErrorEdit(errors);
+      return;
+    }
+    try {
+      await axiosInstance.put(
+        `/todos/${editTodo.id}`,
+        { data: { title, description } },
+        {
+          headers: {
+            Authorization: `Bearer ${userData.jwt}`,
+          },
+        }
+      );
+      onCloseEditModal();
+      toast.success("Todo Updated successfully");
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <div className="space-y-2">
@@ -69,7 +95,12 @@ const TodoList = () => {
             <p className="w-full font-semibold">{todo.title}</p>
             <div className="flex items-center justify-end w-full space-x-3">
               <Button onClick={() => onEditTodo(todo)}>Edit</Button>
-              <Button className="bg-red-700">Remove</Button>
+              <Button
+                className="bg-red-700"
+                onClick={() => onDeleteTodo(todo.id)}
+              >
+                Remove
+              </Button>
             </div>
           </div>
         ))
@@ -87,11 +118,15 @@ const TodoList = () => {
             value={editTodo.title}
             onChange={onChangeEditTodo}
           />
+          {errorEdit.title ? <ErrorMassage msg={errorEdit.title} /> : null}
           <Textarea
             value={editTodo.description}
             name="description"
             onChange={onChangeEditTodo}
           />
+          {errorEdit.description ? (
+            <ErrorMassage msg={errorEdit.description} />
+          ) : null}
           <div className="flex items-center justify-between mt-4 space-x-5">
             <Button>Update</Button>
             <Button
@@ -103,6 +138,27 @@ const TodoList = () => {
             </Button>
           </div>
         </form>
+      </Modal>
+      <Modal
+        isOpen={isDeleteModal}
+        closeModal={toggleDeleteModal}
+        title="Are you sure to Delete this Todo ?  "
+      >
+        <div className="flex items-center space-x-3 mt-5">
+          <Button
+            className="bg-red-600 hover:bg-red-800"
+            // onClick={submitDeleteProduct}
+          >
+            Confirm
+          </Button>
+          <Button
+            className="bg-gray-400 hover:bg-gray-800"
+            type="button"
+            onClick={toggleDeleteModal}
+          >
+            Cancel
+          </Button>
+        </div>
       </Modal>
     </div>
   );

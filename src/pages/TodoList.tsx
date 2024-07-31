@@ -15,6 +15,7 @@ const TodoList = () => {
   const userDataString = localStorage.getItem("userData");
   const userData = userDataString ? JSON.parse(userDataString) : null;
   const [isEditModal, setIsEditModal] = useState(false);
+  const [queryVersion, setQueryVersion] = useState(1);
   const [isDeleteModal, setIsDeleteModal] = useState(false);
   const [isAddModal, setIsAddModal] = useState(false);
   const [errorEdit, setErrorEdit] = useState({
@@ -30,7 +31,7 @@ const TodoList = () => {
   const [addTodo, setAddTodo] = useState({ title: "", description: "" });
   // fetch data using custom query hook
   const { isLoading, data } = useAuthenticatedQuery({
-    queryKey: ["TodoList", `${editTodo.id}`],
+    queryKey: ["TodoList", `${queryVersion}`],
     url: "/users/me?populate=todos",
     config: {
       headers: {
@@ -85,6 +86,7 @@ const TodoList = () => {
       toggleDeleteModal();
       toast.success("Todo deleted successfully");
       setEditTodo(defaultTodo);
+      setQueryVersion((prevVersion) => prevVersion + 1);
     } catch (error) {
       console.log(error);
     }
@@ -109,6 +111,7 @@ const TodoList = () => {
         }
       );
       onCloseEditModal();
+      setQueryVersion((prevVersion) => prevVersion + 1);
       toast.success("Todo Updated successfully");
     } catch (error) {
       console.log(error);
@@ -134,6 +137,7 @@ const TodoList = () => {
         }
       );
       onCloseAddModal();
+      setQueryVersion((prevVersion) => prevVersion + 1);
       toast.success("Todo Added successfully");
     } catch (error) {
       console.log(error);

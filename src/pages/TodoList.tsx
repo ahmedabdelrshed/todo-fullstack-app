@@ -56,8 +56,22 @@ const TodoList = () => {
     setErrorEdit({ ...errorEdit, [name]: "" });
   };
   const onDeleteTodo = (id: number) => {
-    console.log(id);
+    setEditTodo({ ...editTodo, id });
     toggleDeleteModal();
+  };
+  const onConfirmDeleteTodo = async () => {
+    try {
+      await axiosInstance.delete(`/todos/${editTodo.id}`, {
+        headers: {
+          Authorization: `Bearer ${userData.jwt}`,
+        },
+      });
+      toggleDeleteModal();
+      toast.success("Todo deleted successfully");
+      setEditTodo(defaultTodo);
+    } catch (error) {
+      console.log(error);
+    }
   };
   const onSubmitEditTodo = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -92,11 +106,13 @@ const TodoList = () => {
             key={todo.id}
             className="flex items-center justify-between hover:bg-gray-100 duration-300 p-3 rounded-md even:bg-gray-100"
           >
-            <p className="w-full font-semibold">{todo.title}</p>
+            <p className="w-full font-semibold">
+              {todo.id} - {todo.title}
+            </p>
             <div className="flex items-center justify-end w-full space-x-3">
               <Button onClick={() => onEditTodo(todo)}>Edit</Button>
               <Button
-                className="bg-red-700"
+                className="bg-[#C0344D]"
                 onClick={() => onDeleteTodo(todo.id)}
               >
                 Remove
@@ -132,7 +148,7 @@ const TodoList = () => {
             <Button
               onClick={onCloseEditModal}
               type="button"
-              className="bg-red-700"
+              className="bg-[#C0344D]"
             >
               Cancel
             </Button>
@@ -146,8 +162,8 @@ const TodoList = () => {
       >
         <div className="flex items-center space-x-3 mt-5">
           <Button
-            className="bg-red-600 hover:bg-red-800"
-            // onClick={submitDeleteProduct}
+            className="bg-[#C0344D] hover:bg-red-800"
+            onClick={onConfirmDeleteTodo}
           >
             Confirm
           </Button>

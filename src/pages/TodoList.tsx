@@ -129,7 +129,7 @@ const TodoList = () => {
     try {
       axiosInstance.post(
         "/todos",
-        { data: { title, description } },
+        { data: { title, description, user: [userData.user.id] } },
         {
           headers: {
             Authorization: `Bearer ${userData.jwt}`,

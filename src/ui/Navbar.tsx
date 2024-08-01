@@ -26,10 +26,13 @@ const Navbar = () => {
                 Welcome, {userData.user.username}
               </div>
               <li className="text-white duration-200 font-semibold text-lg">
-                <Button onClick={handelLogout}>Logout</Button>
+                <NavLink to="/todos">Todos</NavLink>
               </li>
               <li className="text-white duration-200 font-semibold text-lg">
                 <NavLink to="/profile">Profile</NavLink>
+              </li>
+              <li className="text-white duration-200 font-semibold text-lg">
+                <Button onClick={handelLogout}>Logout</Button>
               </li>
             </>
           ) : (

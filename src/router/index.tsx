@@ -10,6 +10,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import ProtectedRouter from "../auth/ProtectedRouter";
 import HomePage from "../pages/HomePage";
+import TodosPage from "../pages/TodosPage";
 const userDataString = localStorage.getItem("userData");
 const userData = userDataString ? JSON.parse(userDataString) : null;
 const router = createBrowserRouter(
@@ -30,6 +31,14 @@ const router = createBrowserRouter(
           element={
             <ProtectedRouter isAllowed={userData?.jwt} redirectPath="/login">
               <h2>Profile Page</h2>
+            </ProtectedRouter>
+          }
+        />
+        <Route
+          path="todos"
+          element={
+            <ProtectedRouter isAllowed={userData?.jwt} redirectPath="/login">
+              <TodosPage/>
             </ProtectedRouter>
           }
         />

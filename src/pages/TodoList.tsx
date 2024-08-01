@@ -10,6 +10,7 @@ import { validateTodo } from "../validation";
 import ErrorMassage from "../errors/ErrorMassage";
 import toast from "react-hot-toast";
 import TodoListSkeleton from "../ui/TodoListSkeleton";
+import { faker } from "@faker-js/faker";
 
 const TodoList = () => {
   const userDataString = localStorage.getItem("userData");
@@ -57,6 +58,31 @@ const TodoList = () => {
     setAddTodo({ title: "", description: "" });
     toggleAddModal();
     setErrorEdit({ title: "", description: "" });
+  };
+  const onGenerateTodos = async () => {
+    for (let index = 0; index < 50; index++) {
+      try {
+        await axiosInstance.post(
+          "/todos",
+          {
+            data: {
+              title: faker.lorem.words(3),
+              description: faker.lorem.paragraph(2),
+              user: [userData.user.id],
+            },
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${userData.jwt}`,
+            },
+          }
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    setQueryVersion((prevVersion) => prevVersion + 1);
+    toast.success("50 Todos added successfully");
   };
   const onChangeEditTodo = (
     event: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>
@@ -149,6 +175,13 @@ const TodoList = () => {
         <h2 className="text-2xl font-semibold">Your Todos</h2>
         <Button width="w-fit" onClick={toggleAddModal}>
           Create New Todo
+        </Button>
+        <Button
+          width="w-fit"
+          className="bg-white text-blue-600 border-blue-500 border hover:bg-blue-600 hover:text-white"
+          onClick={onGenerateTodos}
+        >
+          Generate Todos
         </Button>
       </div>
       {data.todos.length ? (

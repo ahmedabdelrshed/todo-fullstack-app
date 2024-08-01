@@ -1,3 +1,4 @@
+import { useState } from "react";
 import useAuthenticatedQuery from "../hooks/useAuthenticatedQuery";
 import Paginator from "../ui/Paginator";
 import TodoListSkeleton from "../ui/TodoListSkeleton";
@@ -5,18 +6,27 @@ import TodoListSkeleton from "../ui/TodoListSkeleton";
 const TodosPage = () => {
   const userDataString = localStorage.getItem("userData");
   const userData = userDataString ? JSON.parse(userDataString) : null;
-  const { isLoading, data } = useAuthenticatedQuery({
-    queryKey: ["TodoPage"],
-    url: "/todos",
+  const [page, setPage] = useState<number>(1);
+  const { isLoading, data, isFetching } = useAuthenticatedQuery({
+    queryKey: [`todos-page-${page}`],
+    url: `/todos/?pagination[pageSize]=8&pagination[page]=${page}`,
     config: {
       headers: {
         Authorization: `Bearer ${userData.jwt}`,
       },
     },
   });
+  // Handlers
+  const onClickPrev = () => {
+    setPage((prev) => prev - 1);
+  };
+  const onClickNext = () => {
+    setPage((prev) => prev + 1);
+  };
   if (isLoading) return <TodoListSkeleton />;
+  const { pageCount, total } = data.meta.pagination;
   return (
-    <div className="space-y-4 my-4">
+    <div className="max-w-2xl mx-auto space-y-4 my-2">
       {data.data.length ? (
         data.data.map((todo: { id: number; attributes: { title: string } }) => (
           <div
@@ -31,7 +41,14 @@ const TodosPage = () => {
       ) : (
         <h2>You don't have todos Yet !!!</h2>
       )}
-      <Paginator />
+      <Paginator
+        isLoading={isLoading || isFetching}
+        onClickNext={onClickNext}
+        onClickPrev={onClickPrev}
+        page={page}
+        pageCount={pageCount}
+        total={total}
+      />
     </div>
   );
 };

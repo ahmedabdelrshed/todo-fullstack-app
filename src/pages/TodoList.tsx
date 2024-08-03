@@ -178,7 +178,8 @@ const TodoList = () => {
         </Button>
         <Button
           width="w-fit"
-          className="bg-white text-blue-600 border-blue-500 border hover:bg-blue-600 hover:text-white"
+          className="bg-white text-blue-700 border-blue-500 border hover:bg-blue-600 hover:text-white"
+          style={{ color: "blue" }}
           onClick={onGenerateTodos}
         >
           Generate Todos
@@ -196,7 +197,7 @@ const TodoList = () => {
             <div className="flex items-center justify-end w-full space-x-3">
               <Button onClick={() => onEditTodo(todo)}>Edit</Button>
               <Button
-                className="bg-[#C0344D]"
+                style={{ backgroundColor: "#C0344D" }}
                 onClick={() => onDeleteTodo(todo.id)}
               >
                 Remove
@@ -232,7 +233,7 @@ const TodoList = () => {
             <Button
               onClick={onCloseAddModal}
               type="button"
-              className="bg-[#C0344D]"
+              style={{ backgroundColor: "#C0344D" }}
             >
               Cancel
             </Button>
@@ -264,7 +265,7 @@ const TodoList = () => {
             <Button
               onClick={onCloseEditModal}
               type="button"
-              className="bg-[#C0344D]"
+              style={{ backgroundColor: "#C0344D" }}
             >
               Cancel
             </Button>
@@ -278,7 +279,7 @@ const TodoList = () => {
       >
         <div className="flex items-center space-x-3 mt-5">
           <Button
-            className="bg-[#C0344D] hover:bg-red-800"
+            style={{ backgroundColor: "#C0344D" }}
             onClick={onConfirmDeleteTodo}
           >
             Confirm

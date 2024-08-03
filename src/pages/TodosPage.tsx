@@ -8,9 +8,10 @@ const TodosPage = () => {
   const userData = userDataString ? JSON.parse(userDataString) : null;
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(7);
+  const [sortBy, setSortBy] = useState<string>("DESC");
   const { isLoading, data, isFetching } = useAuthenticatedQuery({
-    queryKey: [`todos-page-${page}`, `todos-size-${pageSize}`],
-    url: `/todos/?pagination[pageSize]=${pageSize}&pagination[page]=${page}`,
+    queryKey: [`todos-page-${page}`, `todos-size-${pageSize}`, `${sortBy}`],
+    url: `/todos/?pagination[pageSize]=${pageSize}&pagination[page]=${page}&sort=createdAt:${sortBy}`,
     config: {
       headers: {
         Authorization: `Bearer ${userData.jwt}`,
@@ -27,23 +28,37 @@ const TodosPage = () => {
   const onChangePageSize = (event: ChangeEvent<HTMLSelectElement>) => {
     setPageSize(+event.target.value);
   };
+  const onChangeSort = (event: ChangeEvent<HTMLSelectElement>) => {
+    setSortBy(event.target.value);
+  };
   if (isLoading) return <TodoListSkeleton />;
   const { pageCount, total } = data.meta.pagination;
   return (
     <div className="max-w-2xl mx-auto space-y-4 my-2">
       <div className="flex justify-between items-center">
         <h3 className="text-blue-600 font-bold ">Your Todos</h3>
-        <select
-          className="border-2 border-indigo-600 rounded-md p-2"
-          value={pageSize}
-          onChange={onChangePageSize}
-        >
-          <option disabled>Page Size</option>
-          <option value={7}>7</option>
-          <option value={10}>10</option>
-          <option value={50}>50</option>
-          <option value={100}>100</option>
-        </select>
+        <div className="space-x-2">
+          <select
+            className="border-2 border-indigo-600 rounded-md p-2"
+            value={pageSize}
+            onChange={onChangePageSize}
+          >
+            <option disabled>Page Size</option>
+            <option value={7}>7</option>
+            <option value={10}>10</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+          <select
+            className="border-2 border-indigo-600 rounded-md p-2"
+            value={sortBy}
+            onChange={onChangeSort}
+          >
+            <option disabled>Sorted by</option>
+            <option value="ASC">Oldest</option>
+            <option value="DESC">Latest</option>
+          </select>
+        </div>
       </div>
       {data.data.length ? (
         data.data.map((todo: { id: number; attributes: { title: string } }) => (
